@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17200f">
+<title>Radio Tiempo Final</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial,sans-serif;
+  background:#17200f;
+  color:white;
+  overflow-x:hidden;
+}
+
+/* VIDEO DE FONDO */
+#background-video{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:-3;
+}
+
+.video-overlay{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background:rgba(0,0,0,.35);
+}
+
+/* CONTENEDOR */
+.main-container{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px 14px;
+}
+
+/* REPRODUCTOR */
+.player{
+  width:100%;
+  max-width:380px;
+  padding:22px 20px;
+  text-align:center;
+  background:rgba(15,22,12,.45);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:24px;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  box-shadow:0 12px 40px rgba(0,0,0,.3);
+}
+
+/* WIDGET DE CLIMA Y HORA */
+.info-widget {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  font-size: 11px;
+  color: #e2efc4;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* PORTADA */
+.cover{
+  display:block;
+  width:150px;
+  height:150px;
+  object-fit:contain;
+  border-radius:18px;
+  margin:0 auto 14px;
+  background:rgba(0,0,0,.18);
+  box-shadow:0 6px 25px rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.25);
+}
+
+/* EN VIVO */
+.live{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:5px 10px;
+  border-radius:30px;
+  background:rgba(220,38,38,.85);
+  font-size:10px;
+  font-weight:bold;
+  letter-spacing:1.5px;
+  margin-bottom:10px;
+}
+
+.live-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:white;
+  animation:pulse 1.3s infinite;
+}
+
+@keyframes pulse{
+  50%{opacity:.25}
+}
+
+/* NOMBRE DE LA RADIO */
+.station-name{
+  display:block;
+  width:100%;
+  margin:0 auto;
+  text-align:center;
+  font-size:clamp(19px,5.5vw,25px);
+  line-height:1.2;
+  font-weight:800;
+  letter-spacing:.4px;
+  text-wrap:balance;
+  text-shadow:0 3px 10px #000;
+}
+
+.slogan{
+  margin-top:6px;
+  color:#fff;
+  font-size:12px;
+  text-align:center;
+  text-shadow:0 2px 5px #000;
+}
+
+/* INFORMACIÓN DE CANCIÓN */
+.song-info{
+  margin:15px 0 10px;
+  padding:10px;
+  border-radius:12px;
+  background:rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.song-label{
+  color:#eee;
+  font-size:9px;
+  letter-spacing:2px;
+  margin-bottom:5px;
+}
+
+#song-title{
+  font-size:12px;
+  font-weight:600;
+  line-height:1.4;
+  text-shadow:0 2px 5px #000;
+}
+
+/* ECUALIZADOR */
+.equalizer{
+  height:26px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:4px;
+  margin:10px auto;
+}
+
+.equalizer span{
+  width:4px;
+  height:7px;
+  border-radius:5px;
+  background:#d4e8a5;
+}
+
+.equalizer.active span{
+  animation:equalize .65s ease-in-out infinite alternate;
+}
+
+.equalizer span:nth-child(2n){animation-delay:.2s}
+.equalizer span:nth-child(3n){animation-delay:.4s}
+
+@keyframes equalize{
+  from{height:6px}
+  to{height:24px}
+}
+
+/* BOTÓN PLAY */
+.play-button{
+  width:62px;
+  height:62px;
+  border:0;
+  border-radius:50%;
+  color:#26351a;
+  background:#e2efc4;
+  font-size:23px;
+  cursor:pointer;
+  box-shadow:0 6px 22px rgba(0,0,0,.35);
+  transition:transform .2s;
+}
+
+.play-button:hover{
+  transform:scale(1.08);
+  background:white;
+}
+
+.controls-label{
+  margin-top:7px;
+  font-size:11px;
+  color:white;
+  text-shadow:0 2px 5px #000;
+}
+
+/* VOLUMEN */
+.volume-area{
+  margin-top:15px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.volume-area i{
+  color:#e2efc4;
+  font-size:13px;
+  cursor:pointer;
+  transition: opacity 0.2s;
+}
+.volume-area i:hover{opacity: 0.8;}
+
+input[type=range]{
+  width:100%;
+  accent-color:#d4e8a5;
+  cursor:pointer;
+}
+
+/* ESTADO Y RECARGA */
+.status-container {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+#status{
+  font-size:11px;
+  color:#e2efc4;
+  text-shadow:0 2px 5px #000;
+}
+
+.reload-stream-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2efc4;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: none;
+}
+
+.footer{
+  margin-top:15px;
+  font-size:9px;
+  color:#fff;
+  letter-spacing:1px;
+  text-shadow:0 2px 5px #000;
+}
+
+/* MÓVILES */
+@media(max-width:480px){
+  .player{
+    max-width:340px;
+    padding:18px 15px;
+  }
+  .cover{
+    width:130px;
+    height:130px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<video id="background-video" autoplay muted loop playsinline preload="auto">
+  <source src="https://videos.pexels.com/video-files/4830190/4830190-hd_1920_1080_25fps.mp4" type="video/mp4">
+</video>
+
+<div class="video-overlay"></div>
+
+<main class="main-container">
+<section class="player">
+
+  <!-- WIDGET DE HORA Y CLIMA (Santa Fe, Aguas Zarcas) -->
+  <div class="info-widget">
+    <div class="info-item">
+      <i class="fas fa-clock"></i>
+      <span id="local-time">--:--</span>
+    </div>
+    <div class="info-item">
+      <i id="weather-icon" class="fas fa-cloud-sun"></i>
+      <span id="local-weather">Cargando...</span>
+    </div>
+  </div>
+
+  <img id="cover" class="cover" src="portada-radio.png" alt="Radio Tiempo Final">
+
+  <div class="live">
+    <span class="live-dot"></span>
+    TRANSMISIÓN EN VIVO
+  </div>
+
+  <h1 class="station-name">RADIO TIEMPO FINAL</h1>
+  <p class="slogan">Palabras de vida a tu Corazón</p>
+
+  <div class="song-info">
+    <div class="song-label">AHORA SUENA</div>
+    <div id="song-title">Radio Tiempo Final</div>
+  </div>
+
+  <div class="equalizer" id="equalizer">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+  </div>
+
+  <button id="play-button" class="play-button" aria-label="Reproducir radio" onclick="toggleRadio()">
+    <i id="play-icon" class="fas fa-play"></i>
+  </button>
+
+  <div class="controls-label" id="control-label">
+    Presiona para escuchar
+  </div>
+
+  <div class="volume-area">
+    <i id="mute-icon" class="fas fa-volume-high" onclick="toggleMute()" title="Silenciar"></i>
+    <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volumen">
+    <i class="fas fa-volume-high" onclick="setVolumeMax()" title="Máximo"></i>
+  </div>
+
+  <div class="status-container">
+    <div id="status">Lista para transmitir</div>
+    <button id="reload-btn" class="reload-stream-btn" onclick="refreshStream()">
+      <i class="fas fa-rotate"></i> Actualizar enlace en vivo
+    </button>
+  </div>
+
+  <div class="footer">2026</div>
+
+</section>
+</main>
+
+<audio id="radio" preload="none" crossorigin="anonymous">
+  <source src="https://sonic.mediacp.eu:8126/stream" type="audio/mpeg">
+</audio>
+
+<script>
+const radio = document.getElementById("radio");
+const playIcon = document.getElementById("play-icon");
+const playButton = document.getElementById("play-button");
+const statusText = document.getElementById("status");
+const controlLabel = document.getElementById("control-label");
+const equalizer = document.getElementById("equalizer");
+const volume = document.getElementById("volume");
+const muteIcon = document.getElementById("mute-icon");
+const songTitle = document.getElementById("song-title");
+const cover = document.getElementById("cover");
+const backgroundVideo = document.getElementById("background-video");
+const reloadBtn = document.getElementById("reload-btn");
+
+const METADATA_URL = "https://sonic.mediacp.eu/cp/get_info.php?p=8126";
+const STREAM_URL = "https://sonic.mediacp.eu:8126/stream";
+const FALLBACK_COVER = "portada-radio.png";
+
+let lastVolume = 0.8;
+radio.volume = Number(volume.value);
+
+/* ACTUALIZAR HORA LOCAL DE COSTA RICA */
+function updateClock() {
+  const now = new Date();
+  const timeString = now.toLocaleTimeString('es-CR', { timeZone: 'America/Costa_Rica', hour: '2-digit', minute: '2-digit' });
+  document.getElementById("local-time").textContent = timeString;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* OBTENER CLIMA DE SANTA FE, AGUAS ZARCAS (San Carlos, Costa Rica) */
+async function updateWeather() {
+  try {
+    // Coordenadas aproximadas de Santa Fe, Aguas Zarcas
+    const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=10.45&longitude=-84.33&current=temperature_2m,weather_code");
+    const data = await res.json();
+    if(data && data.current) {
+      const temp = Math.round(data.current.temperature_2m);
+      const code = data.current.weather_code;
+      
+      let weatherText = `${temp}°C`;
+      let iconClass = "fas fa-cloud-sun";
+
+      // Interpretación básica de códigos meteorológicos WMO
+      if(code === 0) {
+        weatherText += " (Despejado)";
+        iconClass = "fas fa-sun";
+      } else if(code >= 1 && code <= 3) {
+        weatherText += " (Parcial)";
+        iconClass = "fas fa-cloud-sun";
+      } else if(code >= 51 && code <= 67) {
+        weatherText += " (Lluvioso)";
+        iconClass = "fas fa-cloud-rain";
+      } else if(code >= 95) {
+        weatherText += " (Tormenta)";
+        iconClass = "fas fa-bolt";
+      } else {
+        weatherText += " (Nublado)";
+        iconClass = "fas fa-cloud";
+      }
+
+      document.getElementById("local-weather").textContent = weatherText;
+      document.getElementById("weather-icon").className = iconClass;
+    }
+  } catch(e) {
+    document.getElementById("local-weather").textContent = "Clima no disponible";
+  }
+}
+updateWeather();
+setInterval(updateWeather, 600000); // Actualiza el clima cada 10 minutos
+
+async function toggleRadio(){
+  if(radio.paused){
+    statusText.textContent = "Conectando con la emisora...";
+    controlLabel.textContent = "Conectando...";
+    reloadBtn.style.display = "none";
+    try{
+      if(!radio.src.includes("?")) {
+        radio.src = STREAM_URL + "?nocache=" + Date.now();
+      }
+      await radio.play();
+    }catch(error){
+      statusText.textContent = "No se pudo iniciar. Comprueba tu conexión.";
+      controlLabel.textContent = "Presiona para volver a intentar";
+      reloadBtn.style.display = "block";
+    }
+  }else{
+    radio.pause();
+  }
+}
+
+function refreshStream() {
+  statusText.textContent = "Actualizando señal...";
+  radio.src = STREAM_URL + "?refresh=" + Date.now();
+  radio.play().then(() => {
+    reloadBtn.style.display = "none";
+  }).catch(() => {
+    statusText.textContent = "Error al actualizar. Intenta de nuevo.";
+  });
+}
+
+function toggleMute(){
+  if(radio.volume > 0){
+    lastVolume = radio.volume;
+    radio.volume = 0;
+    volume.value = 0;
+    muteIcon.className = "fas fa-volume-xmark";
+  } else {
+    radio.volume = lastVolume || 0.8;
+    volume.value = radio.volume;
+    muteIcon.className = "fas fa-volume-high";
+  }
+}
+
+function setVolumeMax(){
+  radio.volume = 1;
+  volume.value = 1;
+  muteIcon.className = "fas fa-volume-high";
+}
+
+radio.addEventListener("playing",()=>{
+  playIcon.className = "fas fa-pause";
+  playButton.setAttribute("aria-label","Pausar radio");
+  controlLabel.textContent = "Escuchando en vivo";
+  statusText.textContent = "¡CRISTO VIENE PRONTO!";
+  equalizer.classList.add("active");
+  reloadBtn.style.display = "none";
+  updateMediaSession("playing");
+});
+
+radio.addEventListener("pause",()=>{
+  playIcon.className = "fas fa-play";
+  playButton.setAttribute("aria-label","Reproducir radio");
+  controlLabel.textContent = "Presiona para escuchar";
+  statusText.textContent = "Radio en pausa";
+  equalizer.classList.remove("active");
+  updateMediaSession("paused");
+});
+
+radio.addEventListener("waiting",()=>{
+  statusText.textContent = "Cargando transmisión...";
+});
+
+radio.addEventListener("error",()=>{
+  statusText.textContent = "Señal interrumpida.";
+  reloadBtn.style.display = "block";
+});
+
+volume.addEventListener("input",()=>{
+  radio.volume = Number(volume.value);
+  if(radio.volume === 0){
+    muteIcon.className = "fas fa-volume-xmark";
+  } else {
+    muteIcon.className = "fas fa-volume-high";
+  }
+});
+
+function playBackgroundVideo(){
+  backgroundVideo.play().catch(()=>{});
+}
+playBackgroundVideo();
+
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden && backgroundVideo.paused){
+    playBackgroundVideo();
+  }
+});
+
+function getSongArtwork(data){
+  const images = [data.art, data.artwork, data.cover, data.coverart, data.image, data.song_image, data.album_art, data.picture, data.thumb];
+  for(const value of images){
+    if(typeof value === "string" && value.trim() !== ""){
+      return value.trim();
+    }
+  }
+  return null;
+}
+
+function getSongName(data){
+  const titles = [data.title, data.songtitle, data.nowplaying, data.current_song, data.streamtitle, data.song];
+  for(const value of titles){
+    if(typeof value === "string" && value.trim() !== ""){
+      return value.trim();
+    }
+  }
+  return null;
+}
+
+async function updateMetadata(){
+  try{
+    const response = await fetch(METADATA_URL + "&_=" + Date.now(), {cache: "no-store"});
+    if(!response.ok) throw new Error("Metadata no disponible");
+
+    const data = await response.json();
+    const title = getSongName(data);
+    const artwork = getSongArtwork(data);
+
+    if(title){
+      songTitle.textContent = title;
+    }
+
+    if(artwork){
+      cover.style.visibility = "visible";
+      cover.onerror = function(){
+        this.onerror = null;
+        this.src = FALLBACK_COVER;
+      };
+      cover.src = artwork;
+    }else{
+      cover.src = FALLBACK_COVER;
+    }
+
+    updateMediaMetadata(title || "Radio Tiempo Final", artwork || FALLBACK_COVER);
+
+  }catch(error){
+    if(!cover.getAttribute("src")){
+      cover.src = FALLBACK_COVER;
+    }
+  }
+}
+
+function updateMediaMetadata(title, artworkSrc){
+  if(!("mediaSession" in navigator)) return;
+
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: title,
+    artist: "Radio Tiempo Final",
+    album: "Palabras de vida a tu Corazón",
+    artwork: [{
+      src: artworkSrc,
+      sizes: "512x512",
+      type: "image/png"
+    }]
+  });
+}
+
+updateMetadata();
+setInterval(updateMetadata, 20000);
+
+function updateMediaSession(state){
+  if("mediaSession" in navigator){
+    navigator.mediaSession.playbackState = state;
+  }
+}
+
+if("mediaSession" in navigator){
+  updateMediaMetadata("Radio Tiempo Final", FALLBACK_COVER);
+
+  navigator.mediaSession.setActionHandler("play",()=>{
+    radio.play().catch(()=>{});
+  });
+
+  navigator.mediaSession.setActionHandler("pause",()=>{
+    radio.pause();
+  });
+
+  try{
+    navigator.mediaSession.setActionHandler("stop",()=>{
+      radio.pause();
+    });
+  }catch(error){}
+}
+</script>
+
+</body>
+</html>
